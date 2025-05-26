@@ -121,5 +121,57 @@ sub path
 
 ###############################################################################
 
+sub sortBy
+{
+	my $self = shift;
+	die if scalar @_ != 1;
+	my $header = shift;
+	
+	my $headers = ' ' . (join ' ', @{$self->headers}) . ' ';
+	die if $headers !~ /\s+$header\s+/;
+	
+	my @rows = sort {$$b{$header} <=> $$a{$header}} @{$self->rows};
+	$self->setRows(\@rows);
+}
+
+###############################################################################
+
+sub print
+{
+	my $self = shift;
+	die if scalar @_ > 1;
+	my $filePath = shift;
+	die if defined $filePath && ref $filePath;
+	my $handle;
+	
+	if (defined $filePath)
+	{
+		$handle = 'CSV';
+		(open $handle, ">$filePath") || die;
+	}
+	else
+	{
+		$handle = 'STDOUT';
+	}
+	
+	print $handle ((join ',', @{$self->headers}) . "\n");
+	
+	foreach my $row (@{$self->rows})
+	{
+		my @tmp = ();
+		
+		foreach my $header (@{$self->headers})
+		{
+			push @tmp, $$row{$header};
+		}
+		
+		print $handle ((join ',', @tmp) . "\n");
+	}
+	
+	close $handle if defined $filePath;
+}
+
+###############################################################################
+
 return 1;
 
