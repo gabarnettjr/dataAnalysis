@@ -10,6 +10,7 @@ my $outPath = shift;
 my $lineNumber = 0;
 my @rows = ();
 my @headers;
+my @teams = ();
 
 while (<NBA>)
 {
@@ -19,11 +20,15 @@ while (<NBA>)
 	if ($lineNumber == 1)
 	{
 		@headers = split /\s+/, $line;
+		shift @headers;
+		my $pm = pop @headers;
+		my $pfd = pop @headers;
+		push @headers, "$pfd $pm";
 		next;
 	}
 	
 	next if $line !~ /\S+/;
-	next if $line =~ /^\d+$/;
+	next if $line =~ /^\s*\d+\s*$/;
 	next if $line =~ /Logo$/;
 	
 	my %row;
@@ -31,7 +36,8 @@ while (<NBA>)
 	
 	if (scalar @line < 5)
 	{
-		$row{TEAM} = join ' ', @line;
+		push @teams, join ' ', @line;
+		next;
 	}
 	else
 	{
@@ -50,7 +56,7 @@ my @csv = (join ',', @headers);
 
 foreach my $row (@rows)
 {
-    my @csvRow = ();
+    my @csvRow = (shift @teams);
     
     foreach my $header (@headers)
     {
@@ -63,7 +69,6 @@ foreach my $row (@rows)
 (open CSV, ">$outPath") || die;
 print CSV (join "\n", @csv);
 close CSV
-
 
 
 
