@@ -2,11 +2,14 @@
 use strict;
 use warnings;
 
-die if scalar @ARGV != 1;
+die if scalar @ARGV != 2;
 my $inPath = shift;
+my $outPath = shift;
 
 (open NBA, "<$inPath") || die;
 my $lineNumber = 0;
+my @rows = ();
+my @headers;
 
 while (<NBA>)
 {
@@ -15,7 +18,7 @@ while (<NBA>)
 	
 	if ($lineNumber == 1)
 	{
-		my @headers = split /\s+/, $line;
+		@headers = split /\s+/, $line;
 		next;
 	}
 	
@@ -37,6 +40,35 @@ while (<NBA>)
 			$row{$header} = shift @line;
 		}
 	}
+    
+    push @rows, \%row;
 }
 
 close NBA;
+
+my @csv = (join ',', @headers);
+
+foreach my $row (@rows)
+{
+    my @csvRow = ();
+    
+    foreach my $header (@headers)
+    {
+        push @csvRow, $$row{$header};
+    }
+
+    push @csv, (join ',', @csvRow);
+}
+
+(open CSV, ">$outPath") || die;
+print CSV (join "\n", @csv);
+close CSV
+
+
+
+
+
+
+
+
+
